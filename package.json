@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "svelte-routify": "^1.0.0"
+  }
+}
