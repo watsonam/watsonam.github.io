@@ -7,7 +7,6 @@
 
 	onMount(() => {
 		currentPage = window.location.pathname;
-		debugger;
 	});
 </script>
 

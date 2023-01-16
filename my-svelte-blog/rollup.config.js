@@ -36,7 +36,7 @@ export default {
 		name: 'app',
 		file: 'public/build/bundle.js',
 		globals: { 'svelte-routify': 'svelteRoutify', 
-		'svelte-spa-router': 'svelteSpaRouter',},
+		'svelte-spa-router': 'svelteSpaRouter','svelte-markdown': 'svelteMarkdown'},
 	},
 	external: ['svelte-routify','svelte-spa-router'],
 	plugins: [
