@@ -5,10 +5,13 @@
 
 <style>
 .navbar {
-  background-color: #87CEEB; /* or any color of your choice */
+  background-color: #4193b3; /* or any color of your choice */
   display: flex;
   justify-content: center;
+  position: fixed;
+  width: 100%;
   top: 0;
+  margin-top: 0px;
   align-items: center;
 }
 
@@ -21,6 +24,6 @@
 }
 
 .navbar-item:hover {
-  background-color: #6495ED;
+  background-color: #0a40a4;
 }
 </style>

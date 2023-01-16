@@ -7,8 +7,8 @@
 	rel="stylesheet"
 />
 
-<Navbar></Navbar>
 <div class="container">
+	<Navbar></Navbar>
 	<img src="./me.jpg" alt="Adam Watson" class="profile-image" />
 	<h1>Adam Watson</h1>
 	<div class="social-links">
@@ -47,9 +47,9 @@
 		width: 150px;
 		width: 150px;
 		border-radius: 50%;
-		margin-top: 100px;
+		margin-top: 150px;
 		margin-bottom: 15px;
-		box-shadow: 0 0 0 0 #677d00, 0 0 0 white, 0em 0em 0 0em #acd373, 0.1em 0.1em 0em 0.2em #677d00;
+		box-shadow: 0 0 0 0 #4193b3, 0 0 0 white, 0em 0em 0 0em #4193b3, 0.1em 0.1em 0em 0.2em #4193b3;
 	}
 	
 
