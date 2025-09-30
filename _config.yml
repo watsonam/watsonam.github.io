@@ -1,0 +1,43 @@
+# Site settings
+title: Adam Watson
+description: >-
+  Thoughts on Commodities, Machine Learning, and GenAI
+baseurl: ""
+url: "https://adamwatson.io"
+
+# Author info
+author:
+  name: Adam Watson
+  email: your.email@example.com
+
+# Build settings
+markdown: kramdown
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+  math_engine: mathjax
+
+# Plugins
+plugins:
+  - jekyll-feed
+  - jekyll-seo-tag
+
+# Exclude from processing
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor
+  - my-svelte-blog
+  - package.json
+  - package-lock.json
+  - .DS_Store
+
+# Permalink format
+permalink: /:year-:month-:day-:title/
+
+# Collections
+collections:
+  posts:
+    output: true
+    permalink: /:year/:month/:day/:title/
