@@ -2,7 +2,7 @@
 layout: post
 title: "Welcome to the Blog"
 date: 2025-09-30
-image: https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?w=1200&h=800&fit=crop
+image: /assets/images/placeholder.jpg
 ---
 
 Welcome to my new blog! After years of working with WordPress on AWS Lightsail, I've migrated to a cleaner, more modern setup using Jekyll and GitHub Pages.
