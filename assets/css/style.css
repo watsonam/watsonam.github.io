@@ -8,10 +8,12 @@
 :root {
   --text-color: #1a1a1a;
   --bg-color: #ffffff;
-  --link-color: #0066cc;
-  --link-hover: #004499;
-  --border-color: #e5e5e5;
-  --code-bg: #f5f5f5;
+  --link-color: #2563eb;
+  --link-hover: #1e40af;
+  --border-color: #e5e7eb;
+  --code-bg: #f9fafb;
+  --accent-color: #3b82f6;
+  --subtle-bg: #f8fafc;
   --spacing-unit: 1.5rem;
 }
 
@@ -80,26 +82,64 @@ body {
 }
 
 .post-item {
-  margin-bottom: 3rem;
+  margin-bottom: 4rem;
+  display: flex;
+  gap: 2rem;
+  padding-bottom: 3rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.post-item:last-child {
+  border-bottom: none;
+}
+
+.post-thumbnail {
+  flex-shrink: 0;
+  width: 200px;
+  height: 200px;
+  overflow: hidden;
+  border-radius: 8px;
+  background: var(--subtle-bg);
+}
+
+.post-thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.post-thumbnail:hover img {
+  transform: scale(1.05);
+}
+
+.post-info {
+  flex: 1;
+  min-width: 0;
 }
 
 .post-date {
-  display: block;
-  font-size: 0.95rem;
-  color: #666;
-  margin-bottom: 0.5rem;
+  display: inline-block;
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  margin-bottom: 0.75rem;
 }
 
 .post-title {
-  font-size: 1.5rem;
-  font-weight: 600;
+  font-size: 1.625rem;
+  font-weight: 700;
   margin-bottom: 0.75rem;
-  line-height: 1.3;
+  line-height: 1.25;
+  letter-spacing: -0.025em;
 }
 
 .post-title a {
   color: var(--text-color);
   text-decoration: none;
+  transition: color 0.2s ease;
 }
 
 .post-title a:hover {
@@ -107,9 +147,10 @@ body {
 }
 
 .post-excerpt {
-  color: #555;
+  color: #4b5563;
   font-size: 1rem;
-  line-height: 1.6;
+  line-height: 1.7;
+  margin-top: 0.5rem;
 }
 
 /* Post page */
@@ -117,16 +158,35 @@ body {
   margin-bottom: 3rem;
 }
 
+.post-featured-image {
+  width: 100%;
+  max-height: 500px;
+  overflow: hidden;
+  border-radius: 12px;
+  margin-bottom: 2.5rem;
+  background: var(--subtle-bg);
+}
+
+.post-featured-image img {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+}
+
 .post-header .post-title {
-  font-size: 2.2rem;
-  margin-bottom: 0.75rem;
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
   font-weight: 700;
-  line-height: 1.2;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
 }
 
 .post-meta {
-  color: #666;
-  font-size: 1rem;
+  color: #6b7280;
+  font-size: 0.95rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
 }
 
 .post-content {
@@ -272,8 +332,22 @@ body {
     margin-bottom: 3rem;
   }
 
+  .post-item {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .post-thumbnail {
+    width: 100%;
+    height: 250px;
+  }
+
+  .post-title {
+    font-size: 1.375rem;
+  }
+
   .post-header .post-title {
-    font-size: 1.75rem;
+    font-size: 2rem;
   }
 
   .post-content h2 {

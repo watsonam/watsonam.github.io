@@ -10,13 +10,20 @@ layout: default
   <ul class="post-list">
     {% for post in site.posts %}
       <li class="post-item">
-        <span class="post-date">{{ post.date | date: "%b %d, %Y" }}</span>
-        <h3 class="post-title">
-          <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
-        </h3>
-        {% if post.excerpt %}
-          <p class="post-excerpt">{{ post.excerpt | strip_html | truncatewords: 30 }}</p>
+        {% if post.image %}
+        <a href="{{ post.url | relative_url }}" class="post-thumbnail">
+          <img src="{{ post.image | relative_url }}" alt="{{ post.title }}">
+        </a>
         {% endif %}
+        <div class="post-info">
+          <span class="post-date">{{ post.date | date: "%b %d, %Y" }}</span>
+          <h3 class="post-title">
+            <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
+          </h3>
+          {% if post.excerpt %}
+            <p class="post-excerpt">{{ post.excerpt | strip_html | truncatewords: 30 }}</p>
+          {% endif %}
+        </div>
       </li>
     {% endfor %}
   </ul>
