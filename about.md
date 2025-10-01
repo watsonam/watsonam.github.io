@@ -6,7 +6,10 @@ permalink: /about/
 
 # About Me
 
-I work at S&P Global, leading our Commodity Derivates product offering. I previously worked at CarbonChain as Head of Data Science, building carbon accounting software for physical commodity supply chains in some of the world’s heavy-emitting industries. Previously, I started my career  at Markit and IHS, working in data science and product, across the full suite of commodity derivatives.
+I work at S&P Global, leading our Commodity Derivates product offering. I previously worked at CarbonChain as Head of Data Science, building carbon accounting software for physical commodity supply chains in some of the world's heavy-emitting industries. Previously, I started my career  at Markit and IHS, working in data science and product, across the full suite of commodity derivatives.
+
+<br>
+<br>
 
 ## Get in Touch
 
@@ -14,4 +17,4 @@ Feel free to reach out via [email](mailto:adamw6979@gmail.com) or connect with m
 
 ---
 
-*This site is built with Jekyll and hosted on GitHub Pages.*
+<small style="color: #999; font-size: 0.85rem;">*This site is built with Jekyll and hosted on GitHub Pages.*</small>
