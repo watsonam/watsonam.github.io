@@ -6,7 +6,7 @@ permalink: /about/
 
 # About Me
 
-I'm Adam Watson, a Product Developer based in London with a focus on full stack development and machine learning.
+I work at S&P Global, leading our Commodity Derivates product offering. I previously worked at CarbonChain as Head of Data Science, 
 
 ## Technical Experience
 
@@ -34,7 +34,7 @@ This blog focuses on:
 
 ## Get in Touch
 
-Feel free to reach out via [email](mailto:your.email@example.com) or connect with me on [LinkedIn](https://linkedin.com/in/yourprofile).
+Feel free to reach out via [email](mailto:adamw6979@gmail.com) or connect with me on [LinkedIn](https://www.linkedin.com/in/adam-watson-9831a099/).
 
 ---
 
