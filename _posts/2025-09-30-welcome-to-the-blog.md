@@ -5,20 +5,18 @@ date: 2025-09-30
 image: /assets/images/placeholder.jpg
 ---
 
-Welcome to my new blog! After years of working with WordPress on AWS Lightsail, I've migrated to a cleaner, more modern setup using Jekyll and GitHub Pages.
+I've migrated to a cleaner, more modern setup using Jekyll and GitHub Pages.
 
 ## What to Expect
 
-I'll be writing about three main areas:
+I'll be writing about the following areas:
 
-### Commodities
-Insights from the world of commodity trading, market analysis, and quantitative approaches to understanding commodity markets.
-
-### Machine Learning
-Practical machine learning applications, from model development to deployment. I'll share code, techniques, and lessons learned from real-world projects.
-
-### Generative AI
-Exploring the rapidly evolving world of large language models, their applications, and how they're transforming software development and beyond.
+- Commodity markets, starting in the follow order:
+  - Power
+  - Precious Metals
+  - Emissions
+  - Gas
+  - Oil 
 
 ## Why This Setup?
 
@@ -26,8 +24,6 @@ This blog is built with:
 - **Jekyll**: A simple, blog-aware static site generator
 - **GitHub Pages**: Free hosting with excellent performance
 - **Markdown**: Clean, version-controlled content
-
-This gives me complete control over the content and design while keeping things simple and maintainable.
 
 ## Example: A Simple ML Concept
 
@@ -62,9 +58,3 @@ Where:
 - $\beta_1$ is the slope
 - $x$ is the independent variable
 - $\epsilon$ is the error term
-
-## Moving Forward
-
-Stay tuned for more detailed posts on machine learning projects, commodity market analysis, and explorations of generative AI capabilities.
-
-Feel free to reach out if you have questions or topics you'd like me to cover!
