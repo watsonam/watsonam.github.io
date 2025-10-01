@@ -14,7 +14,3 @@ I work at S&P Global, leading our Commodity Derivates product offering. I previo
 ## Get in Touch
 
 Feel free to reach out via [email](mailto:adamw6979@gmail.com) or connect with me on [LinkedIn](https://www.linkedin.com/in/adam-watson-9831a099/).
-
----
-
-<small style="color: #999; font-size: 0.85rem;">*This site is built with Jekyll and hosted on GitHub Pages.*</small>
