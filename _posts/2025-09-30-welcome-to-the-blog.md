@@ -12,11 +12,11 @@ I've migrated to a cleaner, more modern setup using Jekyll and GitHub Pages.
 I'll be writing about the following areas:
 
 - Commodity markets, starting in the follow order:
-  - Power
-  - Precious Metals
-  - Emissions
-  - Gas
-  - Oil 
+  - [ ] Power
+  - [ ] Precious Metals
+  - [ ] Emissions
+  - [ ] Gas
+  - [ ] Oil 
 
 ## Why This Setup?
 
