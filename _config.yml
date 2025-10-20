@@ -1,14 +1,14 @@
 # Site settings
 title: Adam Watson
 description: >-
-  Thoughts on Commodities, Machine Learning, and GenAI
+  Commodities and Data
 baseurl: ""
 url: "https://adamwatson.io"
 
 # Author info
 author:
   name: Adam Watson
-  email: your.email@example.com
+  email: adamw6979@gmail.com
 
 # Build settings
 markdown: kramdown
