@@ -27,3 +27,14 @@ Thumbs.db
 # Node (from old Svelte setup)
 node_modules/
 package-lock.json
+
+# venv
+venv/
+
+*.pkl
+
+.DS_Store
+
+.claude/
+
+*.pyc
