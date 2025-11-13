@@ -38,3 +38,6 @@ venv/
 .claude/
 
 *.pyc
+
+*physical_notifications_oct18*
+*generation_mix.json*
