@@ -1,7 +1,10 @@
 import pandas as pd
 import re
+import os
+import pickle
 from datetime import datetime, timedelta
 from typing import Optional
+from pathlib import Path
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
@@ -48,7 +51,7 @@ def extract_price_data(page_text: str) -> list[dict[str, str | float]]:
             for price_text in price_matches:
                 price_text = price_text.replace(',', '.')
                 price_value = float(price_text)
-                if 10 < price_value < 500:
+                if 0 <= price_value < 1000:
                     data.append({
                         'period': time_period,
                         'price': price_value
@@ -90,6 +93,15 @@ def extract_volume_data(page_text: str) -> list[dict[str, str | float]]:
 def scrape_nordpool(delivery_date: Optional[str] = None, currency: str = 'GBP', area: str = 'UK') -> Optional[pd.DataFrame]:
     if delivery_date is None:
         delivery_date = datetime.now().strftime('%Y-%m-%d')
+
+    cache_dir = 'cache'
+    os.makedirs(cache_dir, exist_ok=True)
+    cache_file = f'{cache_dir}/nordpool_prices_{delivery_date}_{currency}_{area}.pkl'
+
+    if os.path.exists(cache_file):
+        print(f"Loading prices from cache: {delivery_date}")
+        return pickle.load(open(cache_file, 'rb'))
+
     request_date = datetime.strptime(delivery_date, '%Y-%m-%d')
     today = datetime.now()
     two_months_ago = today - timedelta(days=60)
@@ -99,6 +111,7 @@ def scrape_nordpool(delivery_date: Optional[str] = None, currency: str = 'GBP', 
     if request_date < two_months_ago:
         print(f"Error: Date {delivery_date} too old - Nord Pool only keeps ~2 months of data")
         return None
+
     print(f"Fetching fresh data for {delivery_date}")
     url = f"https://data.nordpoolgroup.com/auction/n2ex/prices?deliveryDate={delivery_date}&currency={currency}&aggregation=DeliveryPeriod&deliveryAreas={area}"
     driver = setup_driver()
@@ -123,12 +136,24 @@ def scrape_nordpool(delivery_date: Optional[str] = None, currency: str = 'GBP', 
         print(f"Error: Expected exactly 24 hourly periods, but found {len(df)} rows")
         print(f"Data should contain 24 hours from 23:00-00:00 through 22:00-23:00")
         return None
+
+    pickle.dump(df, open(cache_file, 'wb'))
+    print(f"Cached prices: {cache_file}")
     return df
 
 
 def scrape_nordpool_volumes(delivery_date: Optional[str] = None, area: str = 'UK') -> Optional[pd.DataFrame]:
     if delivery_date is None:
         delivery_date = datetime.now().strftime('%Y-%m-%d')
+
+    cache_dir = 'cache'
+    os.makedirs(cache_dir, exist_ok=True)
+    cache_file = f'{cache_dir}/nordpool_volumes_{delivery_date}_{area}.pkl'
+
+    if os.path.exists(cache_file):
+        print(f"Loading volumes from cache: {delivery_date}")
+        return pickle.load(open(cache_file, 'rb'))
+
     request_date = datetime.strptime(delivery_date, '%Y-%m-%d')
     today = datetime.now()
     two_months_ago = today - timedelta(days=60)
@@ -138,6 +163,7 @@ def scrape_nordpool_volumes(delivery_date: Optional[str] = None, area: str = 'UK
     if request_date < two_months_ago:
         print(f"Error: Date {delivery_date} too old - Nord Pool only keeps ~2 months of data")
         return None
+
     print(f"Fetching volume data for {delivery_date}")
     url = f"https://data.nordpoolgroup.com/auction/n2ex/volumes?deliveryDate={delivery_date}&deliveryAreas={area}"
     driver = setup_driver()
@@ -162,6 +188,9 @@ def scrape_nordpool_volumes(delivery_date: Optional[str] = None, area: str = 'UK
         print(f"Error: Expected exactly 24 hourly periods, but found {len(df)} rows")
         print(f"Data should contain 24 hours from 23:00-00:00 through 22:00-23:00")
         return None
+
+    pickle.dump(df, open(cache_file, 'wb'))
+    print(f"Cached volumes: {cache_file}")
     return df
 
 
@@ -170,3 +199,52 @@ def save_data(df: pd.DataFrame, delivery_date: str) -> str:
     filename = f"nordpool_{delivery_date}_{timestamp}.csv"
     df.to_csv(filename, index=False)
     return filename
+
+
+def save_nordpool_history(days_back: int = 90, data_dir: str = "power_research/data/nordpool") -> int:
+    base_path = Path(data_dir)
+    prices_dir = base_path / "prices"
+    volumes_dir = base_path / "volumes"
+    prices_dir.mkdir(parents=True, exist_ok=True)
+    volumes_dir.mkdir(parents=True, exist_ok=True)
+
+    end_date = datetime.now()
+    start_date = end_date - timedelta(days=days_back)
+    current_date = start_date
+    success_count = 0
+
+    print(f"Saving Nord Pool data from {start_date.strftime('%Y-%m-%d')} to {end_date.strftime('%Y-%m-%d')}")
+
+    while current_date <= end_date:
+        date_str = current_date.strftime('%Y-%m-%d')
+        prices_file = prices_dir / f"{date_str}_prices.csv"
+        volumes_file = volumes_dir / f"{date_str}_volumes.csv"
+
+        if prices_file.exists() and volumes_file.exists():
+            print(f"Skipping {date_str}")
+            current_date += timedelta(days=1)
+            continue
+
+        print(f"Processing {date_str}")
+
+        if not prices_file.exists():
+            prices_df = scrape_nordpool(date_str)
+            if prices_df is not None and len(prices_df) == 24:
+                prices_df.to_csv(prices_file, index=False)
+                print(f"Saved prices for {date_str}")
+
+        if not volumes_file.exists():
+            volumes_df = scrape_nordpool_volumes(date_str)
+            if volumes_df is not None and len(volumes_df) == 24:
+                volumes_df.to_csv(volumes_file, index=False)
+                print(f"Saved volumes for {date_str}")
+                success_count += 1
+
+        current_date += timedelta(days=1)
+
+    print(f"Completed: {success_count} days processed")
+    return success_count
+
+
+if __name__ == "__main__":
+    save_nordpool_history(days_back=11)

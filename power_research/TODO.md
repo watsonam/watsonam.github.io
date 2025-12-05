@@ -13,3 +13,12 @@ Show how gas prices affect the marginal cost of CCGT
 CCGT marginal cost ≈ gas price × 2 + carbon cost- 
 
 Comparing EEX price and Nordpool prices.
+
+
+Data fetched and graphed:
+Nordpool 60 minute day ahead price and volume
+EPEX 30 minute day ahead price and volume
+Fuel mix by fuel (CCGT still the bulk of the fuel mix on non windy days)
+OCGT still need to understand this (particularly expensive)
+How does embedded generation get captured here?
+
