@@ -41,3 +41,9 @@ venv/
 
 *physical_notifications_oct18*
 *generation_mix.json*
+
+requirements.txt
+
+# Python cache and data
+cache/
+.venv/

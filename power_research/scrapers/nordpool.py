@@ -247,4 +247,4 @@ def save_nordpool_history(days_back: int = 90, data_dir: str = "power_research/d
 
 
 if __name__ == "__main__":
-    save_nordpool_history(days_back=11)
+    save_nordpool_history(days_back=14)

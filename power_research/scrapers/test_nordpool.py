@@ -1,5 +1,5 @@
 import pandas as pd
-from scrapers.nordpool import scrape_nordpool, scrape_nordpool_volumes
+from nordpool import scrape_nordpool, scrape_nordpool_volumes
 
 
 def test_nordpool_17_10_2025():
