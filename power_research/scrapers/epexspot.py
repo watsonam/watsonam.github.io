@@ -135,16 +135,18 @@ def extract_table_data(driver: webdriver.Chrome) -> list[dict]:
     return data
 
 
-def extract_auction_data(driver: webdriver.Chrome) -> tuple[dict, list[dict]]:
+def extract_auction_data(driver: webdriver.Chrome) -> tuple[dict, list[dict], Optional[str]]:
     """Extract intraday auction data from the EPEX SPOT table.
 
     Returns:
-        Tuple of (summary_data, period_data) where:
+        Tuple of (summary_data, period_data, actual_date) where:
         - summary_data contains baseload and peakload prices
         - period_data is a list of dicts with period, buy_volume, sell_volume, volume, price
+        - actual_date is the delivery date shown on the page in YYYY-MM-DD format (or None if not found)
     """
     summary_data = {}
     period_data = []
+    actual_date = None
 
     try:
         time.sleep(15)  # Allow time for dynamic content to load
@@ -153,6 +155,24 @@ def extract_auction_data(driver: webdriver.Chrome) -> tuple[dict, list[dict]]:
         page_text = driver.find_element(By.TAG_NAME, "body").text
         periods = re.findall(r'(\d{2}:\d{2}\s*-\s*\d{2}:\d{2})', page_text)
         print(f"Found {len(periods)} time periods in page")
+
+        # Extract the actual delivery date from the page
+        # Format: "14 December 2025" or similar
+        date_match = re.search(r'(\d{1,2})\s+(January|February|March|April|May|June|July|August|September|October|November|December)\s+(\d{4})', page_text)
+        if date_match:
+            from datetime import datetime as dt
+            day = int(date_match.group(1))
+            month_name = date_match.group(2)
+            year = int(date_match.group(3))
+            # Convert month name to number
+            month_map = {
+                'January': 1, 'February': 2, 'March': 3, 'April': 4,
+                'May': 5, 'June': 6, 'July': 7, 'August': 8,
+                'September': 9, 'October': 10, 'November': 11, 'December': 12
+            }
+            month = month_map[month_name]
+            actual_date = f"{year:04d}-{month:02d}-{day:02d}"
+            print(f"Actual delivery date on page: {actual_date}")
 
         tables = driver.find_elements(By.TAG_NAME, "table")
 
@@ -233,7 +253,7 @@ def extract_auction_data(driver: webdriver.Chrome) -> tuple[dict, list[dict]]:
         import traceback
         traceback.print_exc()
 
-    return summary_data, period_data
+    return summary_data, period_data, actual_date
 
 
 def scrape_epexspot(delivery_date: Optional[str] = None,
@@ -391,7 +411,16 @@ def scrape_epexspot_auction(delivery_date: Optional[str] = None,
         driver.get(url)
 
         # Extract auction data
-        summary_data, period_data = extract_auction_data(driver)
+        summary_data, period_data, actual_date = extract_auction_data(driver)
+
+        # Validate that the actual date matches the requested date
+        if actual_date and actual_date != delivery_date:
+            print(f"Warning: Requested date {delivery_date} but website returned {actual_date}")
+            print(f"No data available for {delivery_date}, using latest available date: {actual_date}")
+            # Update the delivery_date to match what was actually returned
+            delivery_date = actual_date
+            # Update cache file to use the actual date
+            cache_file = f'{cache_dir}/epexspot_auction_{auction}_{delivery_date}_p{product}.pkl'
 
         if not period_data:
             print(f"No data found for {auction} on {delivery_date}")
