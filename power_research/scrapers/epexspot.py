@@ -337,7 +337,7 @@ def scrape_epexspot_auction(delivery_date: Optional[str] = None,
     Args:
         delivery_date: Delivery date in format 'YYYY-MM-DD'. If None, uses today.
         market_area: Market area code (default: 'GB')
-        auction: Auction type (default: 'GB-IDA1')
+        auction: Auction type (default: 'GB-IDA1', 'GB-IDA2', 'GB-IDA3')
         product: Product type - '30' for 30-minute, '60' for hourly (default: '30')
 
     Returns:
@@ -370,11 +370,20 @@ def scrape_epexspot_auction(delivery_date: Optional[str] = None,
 
     print(f"Fetching EPEX SPOT auction data for {auction} on {delivery_date}")
 
-    # Build URL - for intraday auctions, trading_date = delivery_date
+    # Determine trading date based on auction type
+    # GB-IDA2 and GB-IDA3: trading_date is the day before delivery_date
+    # GB-IDA1: trading_date = delivery_date
+    if auction in ['GB-IDA2', 'GB-IDA3']:
+        trading_date_obj = request_date - timedelta(days=1)
+        trading_date = trading_date_obj.strftime('%Y-%m-%d')
+    else:
+        trading_date = delivery_date
+
+    # Build URL
     url = (f"https://www.epexspot.com/en/market-results"
            f"?market_area={market_area}"
            f"&auction={auction}"
-           f"&trading_date={delivery_date}"
+           f"&trading_date={trading_date}"
            f"&delivery_date={delivery_date}"
            f"&underlying_year="
            f"&modality=Auction"
@@ -405,10 +414,20 @@ def scrape_epexspot_auction(delivery_date: Optional[str] = None,
         if 'peakload_price' in summary_data:
             df.attrs['peakload_price'] = summary_data['peakload_price']
 
-        # Validate expected number of periods
-        expected_periods = 48 if product == '30' else 24
+        # Validate expected number of periods based on auction type
+        # GB-IDA1: 48 periods (00:00-24:00)
+        # GB-IDA2: 24 periods (12:00-24:00)
+        # GB-IDA3: 24 periods (12:00-24:00)
+        if auction == 'GB-IDA1':
+            expected_periods = 48 if product == '30' else 24
+        elif auction in ['GB-IDA2', 'GB-IDA3']:
+            expected_periods = 24 if product == '30' else 12
+        else:
+            # Default assumption for unknown auction types
+            expected_periods = 48 if product == '30' else 24
+
         if len(df) != expected_periods:
-            print(f"Warning: Expected {expected_periods} periods, but found {len(df)} rows")
+            print(f"Warning: Expected {expected_periods} periods for {auction}, but found {len(df)} rows")
 
         # Cache the data
         pickle.dump(df, open(cache_file, 'wb'))
