@@ -415,12 +415,9 @@ def scrape_epexspot_auction(delivery_date: Optional[str] = None,
 
         # Validate that the actual date matches the requested date
         if actual_date and actual_date != delivery_date:
-            print(f"Warning: Requested date {delivery_date} but website returned {actual_date}")
-            print(f"No data available for {delivery_date}, using latest available date: {actual_date}")
-            # Update the delivery_date to match what was actually returned
-            delivery_date = actual_date
-            # Update cache file to use the actual date
-            cache_file = f'{cache_dir}/epexspot_auction_{auction}_{delivery_date}_p{product}.pkl'
+            print(f"Error: Requested date {delivery_date} but website returned {actual_date}")
+            print(f"No data available for {delivery_date}")
+            return None
 
         if not period_data:
             print(f"No data found for {auction} on {delivery_date}")
