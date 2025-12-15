@@ -370,20 +370,11 @@ def scrape_epexspot_auction(delivery_date: Optional[str] = None,
 
     print(f"Fetching EPEX SPOT auction data for {auction} on {delivery_date}")
 
-    # Determine trading date based on auction type
-    # GB-IDA2 and GB-IDA3: trading_date is the day before delivery_date
-    # GB-IDA1: trading_date = delivery_date
-    if auction in ['GB-IDA2', 'GB-IDA3']:
-        trading_date_obj = request_date - timedelta(days=1)
-        trading_date = trading_date_obj.strftime('%Y-%m-%d')
-    else:
-        trading_date = delivery_date
-
-    # Build URL
+    # Build URL - only delivery_date is needed for auction data
     url = (f"https://www.epexspot.com/en/market-results"
            f"?market_area={market_area}"
            f"&auction={auction}"
-           f"&trading_date={trading_date}"
+           f"&trading_date="
            f"&delivery_date={delivery_date}"
            f"&underlying_year="
            f"&modality=Auction"
