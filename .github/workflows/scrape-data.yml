@@ -1,0 +1,107 @@
+name: Power Market Data Scrapers
+
+on:
+  schedule:
+    - cron: '0 6 * * *'  # Daily at 6 AM UTC
+  workflow_dispatch:
+    inputs:
+      days_back:
+        description: 'Number of days to scrape (default: 1)'
+        default: '1'
+        type: string
+      run_all_scrapers:
+        description: 'Run all scrapers'
+        default: true
+        type: boolean
+
+jobs:
+  scrape-power-data:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install UV
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
+      - name: Create virtual environment and install dependencies
+        run: |
+          uv venv .venv
+          source .venv/bin/activate
+          uv pip install -r requirements.txt
+
+      - name: Install Chrome
+        run: |
+          wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+          sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
+
+      - name: Install ChromeDriver
+        run: |
+          CHROME_VERSION=$(google-chrome --version | grep -oP '\d+\.\d+\.\d+')
+          CHROMEDRIVER_VERSION=$(curl -s "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${CHROME_VERSION%.*}")
+          wget -O /tmp/chromedriver.zip "https://chromedriver.storage.googleapis.com/${CHROMEDRIVER_VERSION}/chromedriver_linux64.zip"
+          sudo unzip /tmp/chromedriver.zip -d /usr/local/bin/
+          sudo chmod +x /usr/local/bin/chromedriver
+
+      - name: Run Nord Pool Scraper
+        if: ${{ github.event.inputs.run_all_scrapers != 'false' }}
+        run: |
+          source .venv/bin/activate
+          cd power_research/scrapers
+          python nordpool.py
+
+      - name: Run EPEX SPOT Scraper
+        if: ${{ github.event.inputs.run_all_scrapers != 'false' }}
+        run: |
+          source .venv/bin/activate
+          cd power_research/scrapers
+          python epexspot.py
+
+      - name: Run Elexon Scraper
+        if: ${{ github.event.inputs.run_all_scrapers != 'false' }}
+        run: |
+          source .venv/bin/activate
+          cd power_research/scrapers
+          python elexon.py
+
+      - name: Create scraping summary
+        run: |
+          echo "# Scraping Results - $(date -I)" > scraping_summary.md
+          echo "" >> scraping_summary.md
+          echo "## Files created:" >> scraping_summary.md
+          find power_research/data -name "*.csv" -newer .github/workflows/scrape-data.yml | sort >> scraping_summary.md || echo "No new CSV files found" >> scraping_summary.md
+          echo "" >> scraping_summary.md
+          echo "## Cache files:" >> scraping_summary.md
+          find cache -name "*.pkl" -newer .github/workflows/scrape-data.yml | wc -l >> scraping_summary.md || echo "0" >> scraping_summary.md
+          cat scraping_summary.md
+
+      - name: Configure Git
+        run: |
+          git config --local user.email "adam.watson1994@hotmail.co.uk"
+          git config --local user.name "GitHub Actions Bot"
+
+      - name: Commit and push data
+        run: |
+          git add power_research/data/ cache/ scraping_summary.md
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "🔄 Update power market data $(date -I)
+
+            - Nord Pool: UK electricity prices and volumes
+            - EPEX SPOT: GB continuous and auction data
+            - Elexon: UK balancing and generation data
+
+            🤖 Generated with GitHub Actions"
+            git push
+          fi

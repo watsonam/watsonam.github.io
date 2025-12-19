@@ -18,7 +18,15 @@ def setup_driver() -> webdriver.Chrome:
     options.add_argument('--headless')
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
-    options.binary_location = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+    options.add_argument('--disable-gpu')
+    options.add_argument('--window-size=1920,1080')
+
+    import platform
+    if platform.system() == "Darwin":
+        options.binary_location = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+    elif os.path.exists("/usr/bin/google-chrome"):
+        options.binary_location = "/usr/bin/google-chrome"
+
     return webdriver.Chrome(options=options)
 
 

@@ -14,18 +14,33 @@ import re
 def setup_driver() -> webdriver.Chrome:
     """Setup Chrome driver with anti-detection settings."""
     options = Options()
-    # Don't use headless - EPEX SPOT blocks headless browsers
+
+    import os
+    import platform
+
+    # For CI environments, use headless mode
+    if os.environ.get('CI') or os.environ.get('GITHUB_ACTIONS'):
+        options.add_argument('--headless')
+        options.add_argument('--disable-gpu')
+        options.add_argument('--window-size=1920,1080')
+
     options.add_argument('--disable-blink-features=AutomationControlled')
     options.add_experimental_option("excludeSwitches", ["enable-automation"])
     options.add_experimental_option('useAutomationExtension', False)
     options.add_argument('user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36')
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
-    options.binary_location = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+
+    # Set Chrome binary location based on OS
+    if platform.system() == "Darwin":
+        options.binary_location = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+    elif os.path.exists("/usr/bin/google-chrome"):
+        options.binary_location = "/usr/bin/google-chrome"
+
     return webdriver.Chrome(options=options)
 
 
-def extract_table_data(driver: webdriver.Chrome) -> list[dict]:
+def extract_table_data(driver: webdriver.Chrome) -> list[dict[str, str | float | None]]:
     """Extract 30-minute period data from the EPEX SPOT table."""
     data = []
 
@@ -74,11 +89,9 @@ def extract_table_data(driver: webdriver.Chrome) -> list[dict]:
                 continue
 
             try:
-                # Helper function to parse numeric values
-                def parse_float(s):
+                def parse_float(s: str) -> float | None:
                     if not s or s == '-':
                         return None
-                    # Remove commas and convert to float
                     return float(s.replace(',', ''))
 
                 # Parse all columns (first column is Low price, not period)
@@ -129,13 +142,11 @@ def extract_table_data(driver: webdriver.Chrome) -> list[dict]:
 
     except Exception as e:
         print(f"Error extracting table data: {e}")
-        import traceback
-        traceback.print_exc()
 
     return data
 
 
-def extract_auction_data(driver: webdriver.Chrome) -> tuple[dict, list[dict], Optional[str]]:
+def extract_auction_data(driver: webdriver.Chrome) -> tuple[dict[str, float], list[dict[str, str | float]], Optional[str]]:
     """Extract intraday auction data from the EPEX SPOT table.
 
     Returns:
@@ -156,15 +167,11 @@ def extract_auction_data(driver: webdriver.Chrome) -> tuple[dict, list[dict], Op
         periods = re.findall(r'(\d{2}:\d{2}\s*-\s*\d{2}:\d{2})', page_text)
         print(f"Found {len(periods)} time periods in page")
 
-        # Extract the actual delivery date from the page
-        # Format: "14 December 2025" or similar
         date_match = re.search(r'(\d{1,2})\s+(January|February|March|April|May|June|July|August|September|October|November|December)\s+(\d{4})', page_text)
         if date_match:
-            from datetime import datetime as dt
             day = int(date_match.group(1))
             month_name = date_match.group(2)
             year = int(date_match.group(3))
-            # Convert month name to number
             month_map = {
                 'January': 1, 'February': 2, 'March': 3, 'April': 4,
                 'May': 5, 'June': 6, 'July': 7, 'August': 8,
@@ -178,7 +185,7 @@ def extract_auction_data(driver: webdriver.Chrome) -> tuple[dict, list[dict], Op
 
         if not tables:
             print("No table found on page")
-            return summary_data, period_data
+            return summary_data, period_data, actual_date
 
         table = tables[0]
         rows = table.find_elements(By.TAG_NAME, "tr")
@@ -250,8 +257,6 @@ def extract_auction_data(driver: webdriver.Chrome) -> tuple[dict, list[dict], Op
 
     except Exception as e:
         print(f"Error extracting auction data: {e}")
-        import traceback
-        traceback.print_exc()
 
     return summary_data, period_data, actual_date
 
@@ -339,8 +344,6 @@ def scrape_epexspot(delivery_date: Optional[str] = None,
 
     except Exception as e:
         print(f"Error scraping EPEX SPOT: {e}")
-        import traceback
-        traceback.print_exc()
         return None
 
     finally:
@@ -454,8 +457,6 @@ def scrape_epexspot_auction(delivery_date: Optional[str] = None,
 
     except Exception as e:
         print(f"Error scraping EPEX SPOT auction: {e}")
-        import traceback
-        traceback.print_exc()
         return None
 
     finally:
@@ -590,62 +591,5 @@ def save_epexspot_auction_history(days_back: int = 90,
 
 
 if __name__ == "__main__":
-    import sys
-
-    # Test continuous market
-    if len(sys.argv) > 1 and sys.argv[1] == 'auction':
-        print("Testing EPEX SPOT auction scraper with 2025-12-14...")
-        df = scrape_epexspot_auction('2025-12-14', auction='GB-IDA1')
-
-        if df is not None:
-            print("\n" + "="*60)
-            print("SAMPLE DATA (first 10 rows):")
-            print("="*60)
-            print(df.head(10).to_string())
-            print(f"\nTotal periods: {len(df)}")
-            print(f"Columns: {', '.join(df.columns.tolist())}")
-
-            # Show summary data
-            print("\n" + "="*60)
-            print("SUMMARY DATA:")
-            print("="*60)
-            if hasattr(df, 'attrs'):
-                if 'baseload_price' in df.attrs:
-                    print(f"Baseload Price: {df.attrs['baseload_price']:.2f} £/MWh")
-                if 'peakload_price' in df.attrs:
-                    print(f"Peakload Price: {df.attrs['peakload_price']:.2f} £/MWh")
-
-            # Show summary statistics
-            print("\n" + "="*60)
-            print("PERIOD STATISTICS:")
-            print("="*60)
-            print(f"Price: min={df['price'].min():.2f}, max={df['price'].max():.2f}, mean={df['price'].mean():.2f}")
-            print(f"Total Volume: {df['volume'].sum():.1f} MWh")
-        else:
-            print("Failed to scrape auction data")
-
-    else:
-        print("Testing EPEX SPOT continuous market scraper with 2025-12-13...")
-        df = scrape_epexspot('2025-12-13')
-
-        if df is not None:
-            print("\n" + "="*60)
-            print("SAMPLE DATA (first 10 rows):")
-            print("="*60)
-            print(df.head(10).to_string())
-            print(f"\nTotal periods: {len(df)}")
-            print(f"Columns: {', '.join(df.columns.tolist())}")
-
-            # Show summary statistics
-            print("\n" + "="*60)
-            print("SUMMARY STATISTICS:")
-            print("="*60)
-            print(f"Weight Avg Price: min={df['weight_avg_price'].min():.2f}, max={df['weight_avg_price'].max():.2f}, mean={df['weight_avg_price'].mean():.2f}")
-            print(f"Total Volume: {df['volume'].sum():.1f} MWh")
-        else:
-            print("Failed to scrape data")
-
-    # Uncomment to download historical data
-    # print("\n\nStarting historical download...")
-    # save_epexspot_history(days_back=14)
-    # save_epexspot_auction_history(days_back=14, auction='GB-IDA1')
+    save_epexspot_history(days_back=3)
+    save_epexspot_auction_history(days_back=3, auction='GB-IDA1')

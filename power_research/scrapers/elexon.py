@@ -5,6 +5,7 @@ import os
 import pickle
 from datetime import datetime, timedelta
 from io import StringIO
+from pathlib import Path
 from typing import Optional
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -628,3 +629,60 @@ def get_top_called_bmus_with_prices(settlement_date: str, period_start: int = 1,
     return result_df
 
 
+def save_elexon_history(days_back: int = 3, data_dir: str = "power_research/data/elexon") -> int:
+    base_path = Path(data_dir)
+    base_path.mkdir(parents=True, exist_ok=True)
+
+    end_date = datetime.now()
+    start_date = end_date - timedelta(days=days_back)
+    current_date = start_date
+    success_count = 0
+
+    print(f"Saving Elexon data from {start_date.strftime('%Y-%m-%d')} to {end_date.strftime('%Y-%m-%d')}")
+
+    while current_date <= end_date:
+        date_str = current_date.strftime('%Y-%m-%d')
+        print(f"Processing {date_str}")
+
+        demand_file = base_path / f"{date_str}_demand_outturn.csv"
+        if not demand_file.exists():
+            demand_df = get_demand_outturn_stream(date_str)
+            if demand_df is not None and not demand_df.empty:
+                demand_df.to_csv(demand_file, index=False)
+                print(f"  ✓ Saved demand outturn data: {len(demand_df)} rows")
+            else:
+                print(f"  ✗ No demand outturn data available")
+        else:
+            print(f"  Skipping demand outturn - already exists")
+
+        balancing_file = base_path / f"{date_str}_balancing_costs.csv"
+        if not balancing_file.exists():
+            balancing_df = analyze_balancing_costs_simple(date_str)
+            if balancing_df is not None and not balancing_df.empty:
+                balancing_df.to_csv(balancing_file, index=False)
+                print(f"  ✓ Saved balancing costs data: {len(balancing_df)} rows")
+            else:
+                print(f"  ✗ No balancing costs data available")
+        else:
+            print(f"  Skipping balancing costs - already exists")
+
+        acceptances_file = base_path / f"{date_str}_acceptances.csv"
+        if not acceptances_file.exists():
+            acceptances_df = get_acceptances_with_fuel_types(date_str)
+            if acceptances_df is not None and not acceptances_df.empty:
+                acceptances_df.to_csv(acceptances_file, index=False)
+                print(f"  ✓ Saved acceptances data: {len(acceptances_df)} rows")
+                success_count += 1
+            else:
+                print(f"  ✗ No acceptances data available")
+        else:
+            print(f"  Skipping acceptances - already exists")
+
+        current_date += timedelta(days=1)
+
+    print(f"Completed: {success_count} days processed")
+    return success_count
+
+
+if __name__ == "__main__":
+    save_elexon_history(days_back=3)

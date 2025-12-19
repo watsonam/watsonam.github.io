@@ -1,0 +1,2 @@
+settlementDate,settlementPeriod,startTime,buyActionCount,sellActionCount,buyPriceMinimum,buyPriceMaximum,buyPriceAverage,sellPriceMinimum,sellPriceMaximum,sellPriceAverage,buyVolumeTotal,sellVolumeTotal,netVolume,acceptance_count,unique_bmus_called,total_level_from,avg_level_from,total_level_to,avg_level_to
+2025-12-16,1,2025-12-16T00:00:00Z,3,0,88.4,98.0,94.8,0,0,0,41.8,0.0,41.8,138,33,15619,113.18115942028986,17254,125.02898550724638
